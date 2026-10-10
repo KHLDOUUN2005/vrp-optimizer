@@ -13,6 +13,8 @@ public class InstanceGenerator {
 	private static final double MAX_LAT = 33.82;
 	private static final double MIN_LNG = -7.84;
 	private static final double MAX_LNG = -7.34;
+	
+	
 	public static List<Stop> randomStops(int count, long seed){
 		List<Stop> stops = new ArrayList<>();
 		Random rand = new Random(seed);
