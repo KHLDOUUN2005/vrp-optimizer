@@ -1,6 +1,7 @@
 package io.github.khaldouun2005.vrp.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
