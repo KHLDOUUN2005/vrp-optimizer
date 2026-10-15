@@ -93,4 +93,25 @@ public class TwoOptOptimizerTest{
 	    assertThat(first.order()).isEqualTo(second.order());
 	    assertThat(first.totalDistance()).isEqualTo(second.totalDistance());
 	}
+	
+	@Test
+	public void twoOptNeverWorsensOnAsymmetricMatrix() {
+	    DistanceMatrix m = asymmetricFixture();
+	    Route nn = new NearestNeighborOptimizer().solve(m, 0, TourMode.CLOSED);
+	    Route twoOpt = new TwoOptOptimizer().solve(m, 0, TourMode.CLOSED);
+
+	    assertThat(twoOpt.totalDistance()).isLessThanOrEqualTo(nn.totalDistance());
+	}
+	
+	private static DistanceMatrix asymmetricFixture() {
+	    double[][] g = {
+	        { 0, 4, 9, 7, 6 },
+	        { 3, 0, 5, 8, 4 },
+	        { 8, 6, 0, 3, 9 },
+	        { 7, 9, 2, 0, 5 },
+	        { 5, 3, 7, 6, 0 }
+	    };
+	    return DistanceMatrix.fromGrid(g);
+	}
+	
 }

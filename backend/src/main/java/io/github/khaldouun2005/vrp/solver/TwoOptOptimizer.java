@@ -17,10 +17,18 @@ public class TwoOptOptimizer implements RouteOptimizer{
 		int size = order.size();
 		outer: for (int i=0; i<size-2; i++) {
 			for (int j=i+2; j<size-1; j++) {
-				double dis1 = matrix.cost(order.get(i), order.get(i+1))
-						+ matrix.cost(order.get(j), order.get(j+1));
-				double dis2 = matrix.cost(order.get(i), order.get(j))
-						+ matrix.cost(order.get(i+1), order.get(j+1));
+				int k=i, t=j;
+				double dis1 = 0.0, dis2 = 0.0;
+				while (k<=j) {
+					dis1 += matrix.cost(order.get(k), order.get(k+1));
+					k++;
+				}
+				dis2 += matrix.cost(order.get(i), order.get(j));
+				while (t>i+1) {
+					dis2 += matrix.cost(order.get(t), order.get(t-1));
+					t--;
+				}
+				dis2 += matrix.cost(order.get(i+1), order.get(j+1));
 				double delta = dis2 - dis1;
 				if (delta<0) {
 					reverseIt(order, i+1, j);
@@ -29,10 +37,19 @@ public class TwoOptOptimizer implements RouteOptimizer{
 				}
 			}
 			if (mode == TourMode.CLOSED) {
-				double dis1 = matrix.cost(order.get(i), order.get(i+1))
-						+ matrix.cost(order.get(size-1), order.get(0));
-				double dis2 = matrix.cost(order.get(i), order.get(size-1))
-						+ matrix.cost(order.get(i+1), order.get(0));
+				int k=i, t=size-1;
+				double dis1 = 0.0, dis2 = 0.0;
+				while (k<size-1) {
+					dis1 += matrix.cost(order.get(k), order.get(k+1));
+					k++;
+				}
+				dis1 += matrix.cost(order.get(size-1), order.get(0));
+				dis2 += matrix.cost(order.get(i), order.get(size-1));
+				while (t>i+1) {
+					dis2 += matrix.cost(order.get(t), order.get(t-1));
+					t--;
+				}
+				dis2 += matrix.cost(order.get(i+1), order.get(0));
 				double delta = dis2 - dis1;
 				if (delta<0) {
 					reverseIt(order, i+1, size-1);
