@@ -1,7 +1,12 @@
 package io.github.khaldouun2005.vrp.api;
 
+import java.net.http.HttpClient;
+
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -10,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.khaldouun2005.vrp.api.dto.OptimizeRequest;
 import io.github.khaldouun2005.vrp.api.dto.OptimizeResponse;
@@ -73,8 +81,11 @@ public class OptimizeController {
 		String providerUsed = optReq.provider() == null ? "OSRM_Provider" : optReq.provider();
 		String optimizerUsed = optReq.optimizer() == null ? "TWO_OPT" : optReq.optimizer();
 		long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
+		List<double[]> geometry = getRouteGeometry(stopsDto, providerUsed, optReq.mode());
+		
 		return new OptimizeResponse(
 				stopsDto,
+				geometry,
 				optDist,
 				naiveDist,
 				savingPrct,
@@ -137,5 +148,56 @@ public class OptimizeController {
 	    } else {
 	        return haverProvider;
 	    }
+	}
+	private List<double[]> getRouteGeometry(List<StopDto> orderedStops, String provider, TourMode mode) {
+	    List<double[]> geometry = new ArrayList<>();
+	    
+	    List<StopDto> routePoints = new ArrayList<>(orderedStops);
+	    
+	    if (mode == TourMode.CLOSED && !routePoints.isEmpty()) {
+	        routePoints.add(routePoints.get(0)); 
+	    }
+
+	    if ("haversine".equalsIgnoreCase(provider)) {
+	        for (StopDto stop : routePoints) {
+	            geometry.add(new double[]{stop.latitude(), stop.longitude()});
+	        }
+	        return geometry;
+	    }
+
+	    StringBuilder coords = new StringBuilder();
+	    for (int i = 0; i < routePoints.size(); i++) {
+	        StopDto stop = routePoints.get(i);
+	        coords.append(stop.longitude()).append(",").append(stop.latitude());
+	        if (i < routePoints.size() - 1) coords.append(";");
+	    }
+
+	    String url = "http://localhost:5000/route/v1/driving/" + coords.toString() + "?geometries=geojson&overview=full";
+
+	    try {
+	        HttpClient client = HttpClient.newHttpClient();
+	        HttpRequest req = HttpRequest.newBuilder(URI.create(url)).GET().build();
+	        HttpResponse<String> response = client.send(req, HttpResponse.BodyHandlers.ofString());
+
+	        if (response.statusCode() == 200) {
+	            ObjectMapper mapper = new ObjectMapper();
+	            JsonNode root = mapper.readTree(response.body());
+	            JsonNode coordsArray = root.get("routes").get(0).get("geometry").get("coordinates");
+
+	            for (JsonNode pair : coordsArray) {
+	                double lng = pair.get(0).asDouble();
+	                double lat = pair.get(1).asDouble();
+	                geometry.add(new double[]{lat, lng});
+	            }
+	            return geometry;
+	        }
+	    } catch (Exception e) {
+	        System.err.println("OSRM geometry failed: " + e.getMessage());
+	    }
+
+	    for (StopDto stop : routePoints) {
+	        geometry.add(new double[]{stop.latitude(), stop.longitude()});
+	    }
+	    return geometry;
 	}
 }

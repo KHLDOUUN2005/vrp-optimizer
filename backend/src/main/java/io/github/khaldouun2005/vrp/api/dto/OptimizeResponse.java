@@ -5,6 +5,7 @@ import io.github.khaldouun2005.vrp.model.TourMode;
 
 public record OptimizeResponse(
     List<StopDto> orderedStops,
+    List<double[]> geometry,
     double optimizedDistance,
     double naiveDistance,
     double savingsPercent,
