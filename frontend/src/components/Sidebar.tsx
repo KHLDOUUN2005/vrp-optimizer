@@ -15,13 +15,11 @@ export default function Sidebar({
 }) {
     const selectClass = "w-full border border-gray-300 rounded-md p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-8 cursor-pointer transition-colors duration-200 mb-3";
     
-    // Only show brute force if stops <= 9
     const canUseBruteForce = stops.length <= 9;
 
     return (
         <div className="absolute top-4 left-4 z-[1000] bg-white p-4 rounded-lg shadow-lg w-80 h-[90%] flex flex-col">
             
-            {/* Header with Logout */}
             <div className="flex justify-between items-center mb-4 border-b pb-2">
                 <h2 className="text-xl font-bold text-gray-800">Route Planner</h2>
                 <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-800 font-semibold transition">
@@ -29,7 +27,6 @@ export default function Sidebar({
                 </button>
             </div>
 
-            {/* Scrollable Content */}
             <div className="overflow-y-auto pr-1 flex-grow">
                 
                 {error && (
@@ -46,7 +43,6 @@ export default function Sidebar({
 
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Optimizer</label>
                 <select value={optimizer} onChange={(e) => setOptimizer(e.target.value)} className={selectClass}>
-                    {/* FIX: Typo corrected and logic added for brute force */}
                     <option value="brute-force" disabled={!canUseBruteForce}>
                         Brute-Force {!canUseBruteForce && "(Max 9 stops)"}
                     </option>
@@ -60,7 +56,6 @@ export default function Sidebar({
                     <option value="OPEN">OPEN (End at last stop)</option>
                 </select>
 
-                {/* Results Dashboard */}
                 {result && (
                     <div className="bg-blue-50 border border-blue-200 p-3 rounded-md mb-4 mt-2">
                         <h3 className="font-bold text-blue-800 mb-2">Results</h3>
@@ -86,7 +81,7 @@ export default function Sidebar({
                 </div>
             </div>
 
-            {/* Fixed Buttons at Bottom */}
+
             <div className="mt-4 pt-3 border-t">
                 <button 
                     onClick={handleOptimize} 

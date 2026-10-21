@@ -1,0 +1,57 @@
+
+services:
+  # The PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vrp
+      POSTGRES_USER: vrp
+      POSTGRES_PASSWORD: vrp
+    ports:
+      - "5433:5432" 
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # The Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # OSRM Routing Engine
+  osrm:
+    image: osrm/osrm-backend
+    command: osrm-routed --algorithm mld /data/casablanca.osrm
+    volumes:
+      - ./infra/osrm/data:/data
+    ports:
+      - "5000:5000"
+
+  # The Spring Boot Backend
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+      - osrm
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/vrp 
+      DB_USER: vrp
+      DB_PASSWORD: vrp
+      OSRM_URL: http://osrm:5000        
+      JWT_SECRET: my-super-secret-production-key-at-least-32-chars
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  # The React Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80" 
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

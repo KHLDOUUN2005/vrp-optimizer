@@ -1,14 +1,14 @@
 package io.github.khaldouun2005.vrp.api;
 
+import java.net.URI;
 import java.net.http.HttpClient;
-
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,18 +43,21 @@ public class OptimizeController {
 	private final BruteForceOptimizer brutFroce_OPT;
 	private final NearestNeighborOptimizer nearestN_OPT;
 	private final TwoOptOptimizer two_OPT;
+	private final String osrmUrl;
 	
 	public OptimizeController(HaversineDistanceProvider haverProvider,
 			@Qualifier("osrmProvider") DistanceProvider distanceProvider,
 			BruteForceOptimizer brutFroce_OPT,
 			NearestNeighborOptimizer nearestN_OPT,
-			TwoOptOptimizer two_OPT) {
+			TwoOptOptimizer two_OPT,
+			@Value("${app.osrm-url}") String osrmUrl) {
 		
 		this.haverProvider = haverProvider;
 		this.distanceProvider = distanceProvider;
 		this.brutFroce_OPT = brutFroce_OPT;
 		this.nearestN_OPT = nearestN_OPT;
 		this.two_OPT = two_OPT;
+		this.osrmUrl = osrmUrl;
 	}
 	
 	@PostMapping("optimize")
@@ -172,7 +175,7 @@ public class OptimizeController {
 	        if (i < routePoints.size() - 1) coords.append(";");
 	    }
 
-	    String url = "http://localhost:5000/route/v1/driving/" + coords.toString() + "?geometries=geojson&overview=full";
+	    String url = osrmUrl + "/route/v1/driving/" + coords.toString() + "?geometries=geojson&overview=full";
 
 	    try {
 	        HttpClient client = HttpClient.newHttpClient();

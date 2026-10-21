@@ -39,7 +39,6 @@ export default function Login(){
           Welcome Back
         </h2>
 
-        {/* Error Message Area */}
         {error && (
           <p className="text-red-500 text-sm mb-4 text-center bg-red-50 p-2 rounded">
             {error}

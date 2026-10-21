@@ -85,7 +85,6 @@ export default function Register() {
                             required
                         />
                         
-                        {/* Show error ONLY if they typed something in confirm AND it doesn't match */}
                         {confirmPassword.length > 0 && !doPasswordsMatch && (
                             <p className="text-sm text-red-500 mt-1">Passwords do not match*</p>
                         )}

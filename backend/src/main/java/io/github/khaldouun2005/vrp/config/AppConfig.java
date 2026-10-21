@@ -11,8 +11,9 @@ import redis.clients.jedis.Jedis;
 public class AppConfig {
 
     @Bean
-    public Jedis jedis() {
-        return new Jedis("localhost", 6379);
+    public Jedis jedis(@Value("${app.redis.host}") String redisHost, 
+                       @Value("${app.redis.port}") int redisPort) {
+        return new Jedis(redisHost, redisPort);
     }
 
     @Bean
