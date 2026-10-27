@@ -18,8 +18,10 @@ export default function Login(){
                 headers: {'content-type':'application/json'},
                 body: JSON.stringify({email, password})
             });
-            if(!response.ok){
-                setError("email or password incorrect!");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                const msg = errorData?.message || errorData?.email || errorData?.password || "Email or password incorrect!";
+                setError(msg);
                 return;
             }
             const data = await response.json();

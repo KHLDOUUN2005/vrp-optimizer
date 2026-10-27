@@ -126,7 +126,9 @@ export default function Map() {
             });
 
             if (!response.ok) {
-                throw new Error("Optimization failed. Please try again.");
+                const errorData = await response.json().catch(() => null);
+                const msg = errorData?.message || "Optimization failed. Please try again.";
+                throw new Error(msg);
             }
 
             const data = await response.json();

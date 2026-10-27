@@ -28,7 +28,10 @@ export default function Register() {
             });
 
             if (!response.ok) {
-                setError('This email address is already in use!');
+                const errorData = await response.json().catch(() => null);
+                
+                const msg = errorData?.message || errorData?.email || errorData?.password || 'Registration failed. Please try again.';
+                setError(msg);
                 return;
             }
 

@@ -5,15 +5,21 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,6 +42,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
+@RestControllerAdvice
 public class OptimizeController {
 	
 	private final HaversineDistanceProvider haverProvider;
@@ -58,6 +65,15 @@ public class OptimizeController {
 		this.nearestN_OPT = nearestN_OPT;
 		this.two_OPT = two_OPT;
 		this.osrmUrl = osrmUrl;
+	}
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<Map<String, String>> handleMethodArgument(MethodArgumentNotValidException ex){
+		Map<String, String> errors = new HashMap<>();
+		ex.getBindingResult().getFieldErrors().forEach(
+				(error) ->{
+					errors.put(error.getField(), error.getDefaultMessage());
+				});
+		return new ResponseEntity(errors, HttpStatus.BAD_REQUEST);
 	}
 	
 	@PostMapping("optimize")
